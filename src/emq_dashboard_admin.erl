@@ -129,21 +129,19 @@ check(Username, Password) ->
 
 init([]) ->
     % Create mqtt_admin table
-    ok = emqttd_mnesia:create_table(mqtt_admin, [
+    ok = ekka_mnesia:create_table(mqtt_admin, [
                 {type, set},
                 {local_content, true}, %% local_content to avoid blocking on mnesia:wait_for_tables/2
                 {disc_copies, [node()]},
                 {record_name, mqtt_admin},
                 {attributes, record_info(fields, mqtt_admin)}]),
-    ok = emqttd_mnesia:copy_table(mqtt_admin, disc_copies),
+    ok = ekka_mnesia:copy_table(mqtt_admin, disc_copies),
     %% Wait???
     %% mnesia:wait_for_tables([mqtt_admin], 5000),
     % Init mqtt_admin table
     case needs_defaut_user() of
-        true ->
-            insert_default_user();
-        false ->
-            ok
+        true  -> insert_default_user();
+        false -> ok
     end,
     {ok, state}.
 
@@ -190,4 +188,3 @@ insert_default_user() ->
                         tags = <<"administrator">>},
     mnesia:transaction(fun mnesia:write/1, [Admin]).
 
-     
