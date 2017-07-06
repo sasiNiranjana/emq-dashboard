@@ -61,6 +61,7 @@
                             <span v-show="node['cluster_status'] == 'Running'" class="badge badge-success">{{ node['cluster_status']}}</span>
                             <span v-show="node['cluster_status'] == 'Stopped'" class="badge badge-danger"> {{ node['cluster_status']}}</span>
                             <span v-show="node['cluster_status'] == 'Netsplit'" class="badge badge-danger"> {{ node['cluster_status']}}</span>
+                            <span v-show="node['cluster_status'] == 'Badrpc'" class="badge badge-danger"> {{ node['cluster_status']}}</span>
                             </td>
                         </tr>
                     </tbody>
