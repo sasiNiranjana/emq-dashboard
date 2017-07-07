@@ -69,9 +69,9 @@ cpu() ->
 nodes_info() ->
     Running = mnesia:system_info(running_db_nodes),
     Stopped = mnesia:system_info(db_nodes) -- Running,
-    DownNodes = lists:map(fun stop_node/1, Stopped),
-    {ok, [rpc:call(Node, ?MODULE, node_info, []) || Node <- Running] 
-         ++ DownNodes}.
+    DownNodes = lists:map(fun stopped_node_info/1, Stopped),
+    RunningNodes = lists:map(fun running_node_info/1, Running),
+    {ok, RunningNodes ++ DownNodes}.
 
 node_info() ->
     CpuInfo = [{K, list_to_binary(V)} || {K, V} <- emqttd_vm:loads()],
@@ -114,6 +114,13 @@ kmg(Byte) ->
 float(F, S) ->
     iolist_to_binary(io_lib:format("~.2f~s", [F, S])).
 
-stop_node(Node) ->
+stopped_node_info(Node) ->
     [{name, Node}, {cluster_status, 'Stopped'}].
 
+running_node_info(Node) ->
+    case rpc:call(Node, ?MODULE, node_info, []) of
+        {badrpc, Reason} ->
+            lager:error("The Node:~p bad rpc, Error: ~p", [Node, Reason]),
+            [{name, Node}, {cluster_status, 'Badrpc'}];
+        NodeInfo-> NodeInfo
+    end.
