@@ -118,7 +118,7 @@ stopped_node_info(Node) ->
     [{name, Node}, {cluster_status, 'Stopped'}].
 
 running_node_info(Node) ->
-    case rpc:call(Node, ?MODULE, node_info, []) of
+    case rpc:call(Node, ?MODULE, node_info, [], 20000) of
         {badrpc, Reason} ->
             lager:error("The Node:~p bad rpc, Error: ~p", [Node, Reason]),
             [{name, Node}, {cluster_status, 'Badrpc'}];
