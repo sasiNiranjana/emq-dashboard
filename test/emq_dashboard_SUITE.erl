@@ -37,7 +37,7 @@ init_per_suite(Config) ->
 end_per_suite(_Config) ->
     application:stop(emq_dashboard),
     application:stop(emqttd),
-    emqttd_mnesia:ensure_stopped().
+    ekka_mnesia:ensure_stopped().
  
 brokers(_) ->
     ?assert(connect_dashbaord_(get, "api/brokers", auth_header_())).
