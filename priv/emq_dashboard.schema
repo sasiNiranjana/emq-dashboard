@@ -1,5 +1,15 @@
 %%-*- mode: erlang -*-
 %% emq_dashboard config mapping
+{mapping, "dashboard.username", "emq_dashboard.username", [
+  {default, "admin"},
+  {datatype, string}
+]}.
+
+{mapping, "dashboard.password", "emq_dashboard.password", [
+  {default, "public"},
+  {datatype, string}
+]}.
+
 {mapping, "dashboard.listener.http", "emq_dashboard.listeners", [
   %%{default, 18083},
   {datatype, [integer, ip]}
