@@ -139,10 +139,7 @@ init([]) ->
     %% Wait???
     %% mnesia:wait_for_tables([mqtt_admin], 5000),
     % Init mqtt_admin table
-    case needs_defaut_user() of
-        true  -> insert_default_user();
-        false -> ok
-    end,
+    insert_default_user(),
     {ok, state}.
 
 handle_call(_Req, _From, State) ->
