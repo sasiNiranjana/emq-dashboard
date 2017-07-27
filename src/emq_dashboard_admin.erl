@@ -180,8 +180,8 @@ is_empty(Tab) ->
     mnesia:dirty_first(Tab) == '$end_of_table'.
 
 insert_default_user() ->
-    Username = application:get_env(emq_dashboard, username),
-    Password = application:get_env(emq_dashboard, password),
+    {ok, Username} = application:get_env(emq_dashboard, username),
+    {ok, Password} = application:get_env(emq_dashboard, password),
     Admin = #mqtt_admin{username = list_to_binary(Username),
                         password = hash(list_to_binary(Password)),
                         tags = <<"administrator">>},
