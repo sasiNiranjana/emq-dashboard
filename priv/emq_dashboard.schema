@@ -72,11 +72,11 @@
   lists:append([
       case cuttlefish:conf_get("dashboard.listener.http", Conf, undefined) of
           undefined -> [];
-          HttpPort  -> [{http, HttpPort, Opts("dashboard.listener.http")}]
+          HttpPort  -> [{proto, http}, {port, HttpPort}, {opts, Opts("dashboard.listener.http")}]
       end,
       case cuttlefish:conf_get("dashboard.listener.https", Conf, undefined) of
           undefined -> [];
-          HttpsPort -> [{https, HttpsPort, [{sslopts, SslOpts("dashboard.listener.https")} | Opts("dashboard.listener.https")]}]
+          HttpsPort -> [{proto, https}, {port, HttpsPort}, {opts, [{sslopts, SslOpts("dashboard.listener.https")} | Opts("dashboard.listener.https")]}]
       end])
 end}.
 

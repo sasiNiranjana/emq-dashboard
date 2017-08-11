@@ -25,7 +25,11 @@
 
 start(_StartType, _StartArgs) ->
     {ok, Sup} = emq_dashboard_sup:start_link(),
-    {ok, Listeners} = application:get_env(?APP, listeners),
+    {ok, Listeners0} = application:get_env(?APP, listeners),
+    Proto = proplists:get_value(proto, Listeners0, http),
+    Port = proplists:get_value(port, Listeners0, 18083),
+    Opts = proplists:get_value(opts, Listeners0, []),
+    Listeners = [{Proto, Port, Opts}],
     ok = emqttd_access_control:register_mod(auth, emq_auth_dashboard, [Listeners], 9999),
     lists:foreach(fun(Listener) -> start_listener(Listener) end, Listeners),
     emq_dashboard_cli:load(),
@@ -34,7 +38,11 @@ start(_StartType, _StartArgs) ->
 stop(_State) ->
     emq_dashboard_cli:unload(),
     emqttd_access_control:unregister_mod(auth, emq_auth_dashboard),
-    {ok, Listeners} = application:get_env(?APP, listeners),
+    {ok, Listeners0} = application:get_env(?APP, listeners),
+    Proto = proplists:get_value(proto, Listeners0, http),
+    Port = proplists:get_value(port, Listeners0, 18083),
+    Opts = proplists:get_value(opts, Listeners0, []),
+    Listeners = [{Proto, Port, Opts}],
     lists:foreach(fun(Listener) -> stop_listener(Listener) end, Listeners).
 
 %% start http listener
