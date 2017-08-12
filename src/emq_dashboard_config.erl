@@ -39,8 +39,6 @@ unregister() ->
 register_formatter() ->
     [clique:register_formatter(cuttlefish_variable:tokenize(Key), 
      fun formatter_callback/2) || Key <- keys()].
-formatter_callback([_, _, Key], Params) ->
-    proplists:get_value(port, Params);
 formatter_callback([_, _, _, Key], Params) ->
     proplists:get_value(list_to_atom(Key), proplists:get_value(opts, Params)).
 
@@ -58,10 +56,6 @@ register_config() ->
     [clique:register_config(Key , fun config_callback/2) || Key <- Keys],
     clique:register_config_whitelist(Keys, ?APP).
 
-config_callback([_, _, _], Value) ->
-    {ok, Env} = application:get_env(?APP, listeners),
-    application:set_env(?APP, listeners, lists:keyreplace(port, 1, Env, {port, Value})),
-    " successfully\n";
 config_callback([_, _, _, Key0], Value) ->
     {ok, Env} = application:get_env(?APP, listeners),
     Env2 = proplists:get_value(opts, Env),
@@ -82,6 +76,5 @@ unregister_config() ->
 %% Internal Functions
 %%--------------------------------------------------------------------
 keys() ->
-    ["dashboard.listener.http",
-     "dashboard.listener.http.acceptors",
+    ["dashboard.listener.http.acceptors",
      "dashboard.listener.http.max_clients"].
