@@ -33,6 +33,7 @@ start(_StartType, _StartArgs) ->
     ok = emqttd_access_control:register_mod(auth, emq_auth_dashboard, [Listeners], 9999),
     lists:foreach(fun(Listener) -> start_listener(Listener) end, Listeners),
     emq_dashboard_cli:load(),
+    emq_dashboard_config:register(),
     {ok, Sup}.
 
 stop(_State) ->
@@ -43,7 +44,8 @@ stop(_State) ->
     Port = proplists:get_value(port, Listeners0, 18083),
     Opts = proplists:get_value(opts, Listeners0, []),
     Listeners = [{Proto, Port, Opts}],
-    lists:foreach(fun(Listener) -> stop_listener(Listener) end, Listeners).
+    lists:foreach(fun(Listener) -> stop_listener(Listener) end, Listeners),
+    emq_dashboard_config:unregister().
 
 %% start http listener
 start_listener({Proto, Port, Options}) when Proto == http orelse Proto == https ->
