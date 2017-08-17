@@ -25,27 +25,17 @@
 
 start(_StartType, _StartArgs) ->
     {ok, Sup} = emq_dashboard_sup:start_link(),
-    {ok, Listeners0} = application:get_env(?APP, listeners),
-    Proto = proplists:get_value(proto, Listeners0, http),
-    Port = proplists:get_value(port, Listeners0, 18083),
-    Opts = proplists:get_value(opts, Listeners0, []),
-    Listeners = [{Proto, Port, Opts}],
+    {ok, Listeners} = application:get_env(?APP, listeners),
     ok = emqttd_access_control:register_mod(auth, emq_auth_dashboard, [Listeners], 9999),
     lists:foreach(fun(Listener) -> start_listener(Listener) end, Listeners),
     emq_dashboard_cli:load(),
-    emq_dashboard_config:register(),
     {ok, Sup}.
 
 stop(_State) ->
     emq_dashboard_cli:unload(),
     emqttd_access_control:unregister_mod(auth, emq_auth_dashboard),
-    {ok, Listeners0} = application:get_env(?APP, listeners),
-    Proto = proplists:get_value(proto, Listeners0, http),
-    Port = proplists:get_value(port, Listeners0, 18083),
-    Opts = proplists:get_value(opts, Listeners0, []),
-    Listeners = [{Proto, Port, Opts}],
-    lists:foreach(fun(Listener) -> stop_listener(Listener) end, Listeners),
-    emq_dashboard_config:unregister().
+    {ok, Listeners} = application:get_env(?APP, listeners),
+    lists:foreach(fun(Listener) -> stop_listener(Listener) end, Listeners).
 
 %% start http listener
 start_listener({Proto, Port, Options}) when Proto == http orelse Proto == https ->
