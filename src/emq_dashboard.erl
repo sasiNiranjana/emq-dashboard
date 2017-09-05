@@ -83,10 +83,13 @@ respond(Req, Code, Data) ->
 %%--------------------------------------------------------------------
 
 handle_request(Req, State) ->
-    Path = Req:get(path), 
+    Path = Req:get(path),
     case Path of
         "/api/logout" ->
             respond(Req, 401, []);
+        "/api/v2/" ++ _Name ->
+            {_, _, [State1]} = emqttd_http:http_handler(),
+            emqttd_http:handle_request(Req, State1);
         _ -> 
             if_authorized(Req, fun() -> handle_request(Path, Req, State) end)
     end.
