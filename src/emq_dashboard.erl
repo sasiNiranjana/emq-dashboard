@@ -24,7 +24,7 @@
 
 -define(APP, ?MODULE).
 
--record(state, {docroot, dispatch}).
+-record(state, {docroot, dispatch, v2_dispatch}).
 
 %%--------------------------------------------------------------------
 %% HTTP Handler and Dispatcher
@@ -33,7 +33,8 @@
 http_handler() ->
     {ok, Modules} = application:get_key(?APP, modules),
     APIs = lists:append(lists:map(fun http_api/1, Modules)),
-    State = #state{docroot  = docroot(), dispatch = dispatcher(APIs)},
+    State = #state{docroot  = docroot(), dispatch = dispatcher(APIs),
+                   v2_dispatch = emqttd_http:dispatcher()},
     {?MODULE, handle_request, [State]}.
 
 http_api(Mod) ->
@@ -82,27 +83,24 @@ respond(Req, Code, Data) ->
 %% Handle HTTP Request
 %%--------------------------------------------------------------------
 
-handle_request(Req, State = #state{docroot = DocRoot}) ->
-    Path = Req:get(path),
-    case Path of
+handle_request(Req, State = #state{docroot = DocRoot,
+                                   dispatch = Dispatch,
+                                   v2_dispatch = V2Dispatch}) ->
+    case Path = Req:get(path) of
         "/api/logout" ->
             respond(Req, 401, []);
-        "/api/v2/" ++ _Name ->
-            {_, _, [State1]} = emqttd_http:http_handler(),
-            emqttd_http:inner_handle_request(Req, State1);
+        "/api/v2/" ++ Url ->
+            io:format("API V2: ~s~n", [Url]),
+            V2Dispatch(Req:get(method), Url, Req);
         "api/current_user" ->
             "Basic " ++ BasicAuth =  Req:get_header_value("Authorization"),
             {Username, _Password} = user_passwd(BasicAuth),
             respond(Req, 200, [{username, bin(Username)}]);
-        "api/" ++ Name ->
-            if_authorized(Req, fun() -> handle_request("api/" ++ Name, Req, State) end);
+        "api/" ++ Url ->
+            if_authorized(Req, fun() -> Dispatch(Req, Url, params(Req)) end);
         "/" ++ Rest ->
             mochiweb_request:serve_file(Rest, DocRoot, Req)
     end.
-
-handle_request("/api/" ++ Name, Req, #state{dispatch = Dispatch}) ->
-    Params = params(Req),
-    Dispatch(Req, Name, Params).
 
 %%--------------------------------------------------------------------
 %% Table Query and Pagination

@@ -37,7 +37,7 @@ stop(_State) ->
     {ok, Listeners} = application:get_env(?APP, listeners),
     lists:foreach(fun(Listener) -> stop_listener(Listener) end, Listeners).
 
-%% start http listener
+%% Start HTTP Listener
 start_listener({Proto, Port, Options}) when Proto == http orelse Proto == https ->
     mochiweb:start_http(listener_name(Proto), Port, Options, emq_dashboard:http_handler()).
 
