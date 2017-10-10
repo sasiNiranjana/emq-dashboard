@@ -19,7 +19,7 @@
 
 -behaviour(gen_server).
 
--include("emq_dashboard.hrl").
+-include("emqx_dashboard.hrl").
 
 %% API Function Exports
 -export([start_link/0]).
@@ -172,7 +172,7 @@ md5_hash(SaltBin, Password) ->
     erlang:md5(<<SaltBin/binary, Password/binary>>).
 
 salt() ->
-    emqttd_time:seed(),
+    emqx_time:seed(),
     Salt = random:uniform(16#ffffffff),
     <<Salt:32>>.
 

@@ -1,6 +1,6 @@
 
-emq_dashboard
-=============
+emqx-dashboard
+==============
 
 Dashboard for the EMQ Broker.
 
@@ -24,7 +24,7 @@ Load Plugin
 -----------
 
 ```
-./bin/emqttd_ctl plugins load emq_dashboard
+./bin/emqx_ctl plugins load emqx_dashboard
 ```
 
 Login

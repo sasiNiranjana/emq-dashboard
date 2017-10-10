@@ -14,7 +14,7 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
--module(emq_dashboard).
+-module(emqx_dashboard).
 
 -import(proplists, [get_value/2]).
 
@@ -167,7 +167,7 @@ authorized(Req) ->
     case Req:get_header_value("Authorization") of
         "Basic " ++ BasicAuth ->
             {Username, Password} = user_passwd(BasicAuth),
-            case emq_dashboard_admin:check(bin(Username), bin(Password)) of
+            case emqx_dashboard_admin:check(bin(Username), bin(Password)) of
                 ok -> true;
                 {error, Reason} ->
                     lager:error("HTTP Auth failure: username=~s, reason=~p",

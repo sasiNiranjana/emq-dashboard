@@ -14,18 +14,16 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
-%% @doc emqttd alarms API.
+-module(emqx_dashboard_alarm).
 
--module(emq_dashboard_alarm).
-
--include_lib("emqttd/include/emqttd.hrl").
+-include_lib("emqx/include/emqx.hrl").
 
 -export([alarms/0]).
 
 -http_api({"alarms",  alarms,   []}).
 
 alarms() ->
-    Alarms = lists:map(fun alarm/1, emqttd_alarm:get_alarms()),
+    Alarms = lists:map(fun alarm/1, emqx_alarm:get_alarms()),
     {ok, Alarms}.
 
 alarm(#mqtt_alarm{id        = AlarmId,
@@ -37,5 +35,5 @@ alarm(#mqtt_alarm{id        = AlarmId,
      {severity, Severity},
      {title, list_to_binary(Title)},
      {summary, list_to_binary(Summary)},
-     {occurred_at, list_to_binary(emq_dashboard:strftime(Timestamp))}].
+     {occurred_at, list_to_binary(emqx_dashboard:strftime(Timestamp))}].
 

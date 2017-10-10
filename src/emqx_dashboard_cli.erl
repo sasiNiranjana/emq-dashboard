@@ -14,20 +14,20 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
--module(emq_dashboard_cli).
+-module(emqx_dashboard_cli).
 
--include_lib("emqttd/include/emqttd_cli.hrl").
+-include_lib("emqx/include/emqx_cli.hrl").
 
 -export([load/0, admins/1, unload/0]).
 
 load() ->
-    emqttd_ctl:register_cmd(admins, {?MODULE, admins}, []).
+    emqx_ctl:register_cmd(admins, {?MODULE, admins}, []).
 
 admins(["add", Username, Password]) ->
     admins(["add", Username, Password, ""]);
 
 admins(["add", Username, Password, Tag]) ->
-    case emq_dashboard_admin:add_user(bin(Username), bin(Password), bin(Tag)) of
+    case emqx_dashboard_admin:add_user(bin(Username), bin(Password), bin(Tag)) of
         ok ->
             ?PRINT_MSG("ok~n");
         {error, already_existed} ->
@@ -37,11 +37,11 @@ admins(["add", Username, Password, Tag]) ->
     end;
 
 admins(["passwd", Username, Password]) ->
-    Status  = emq_dashboard_admin:change_password(bin(Username), bin(Password)),
+    Status  = emqx_dashboard_admin:change_password(bin(Username), bin(Password)),
     ?PRINT("~p~n", [Status]);
 
 admins(["del", Username]) ->
-    Status  = emq_dashboard_admin:remove_user(bin(Username)),
+    Status  = emqx_dashboard_admin:remove_user(bin(Username)),
     ?PRINT("~p~n", [Status]);
 
 admins(_) ->
@@ -50,6 +50,6 @@ admins(_) ->
             {"admins del <Username>",                    "Delete dashboard user" }]).
 
 unload() ->
-    emqttd_ctl:unregister_cmd(admins).
+    emqx_ctl:unregister_cmd(admins).
 
 bin(S) -> iolist_to_binary(S).

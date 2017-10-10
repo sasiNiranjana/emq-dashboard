@@ -1,10 +1,10 @@
--module(emq_dashboard_SUITE).
+-module(emqx_dashboard_SUITE).
 
 -compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
 
--include_lib("emqttd/include/emqttd.hrl").
+-include_lib("emqx/include/emqx.hrl").
 
 -define(CONTENT_TYPE, "application/x-www-form-urlencoded").
 
@@ -31,12 +31,12 @@ groups() ->
 
 init_per_suite(Config) ->
     DataDir = proplists:get_value(data_dir, Config),
-    [start_apps(App, DataDir) || App <- [emqttd, emq_dashboard]],
+    [start_apps(App, DataDir) || App <- [emqx, emqx_dashboard]],
     Config.
  
 end_per_suite(_Config) ->
-    application:stop(emq_dashboard),
-    application:stop(emqttd),
+    application:stop(emqx_dashboard),
+    application:stop(emqx),
     ekka_mnesia:ensure_stopped().
  
 brokers(_) ->
@@ -68,8 +68,8 @@ bnode(_) ->
 
 get_alarms(_) ->
     AlarmTest = #mqtt_alarm{id = <<"1">>, severity = error, title="alarm title", summary="alarm summary"},
-    emqttd_alarm:set_alarm(AlarmTest),
-    {ok, [Alarm]} = emq_dashboard_alarm:alarms(),
+    emqx_alarm:set_alarm(AlarmTest),
+    {ok, [Alarm]} = emqx_dashboard_alarm:alarms(),
     ?assertEqual(error, proplists:get_value(severity, Alarm)).
 
 clients(_) ->
@@ -77,47 +77,47 @@ clients(_) ->
    
 clients_query(_) ->
     Sock = client_connect_(<<16,12,0,4,77,81,84,84,4,0,0,90,0,0>>, 4),
-    {ok, Entry} = emq_dashboard_client:list(<<>>, 1, 100),
+    {ok, Entry} = emqx_dashboard_client:list(<<>>, 1, 100),
     Client = proplists:get_value(result, Entry),
     ClientId = proplists:get_value(clientId, Client), 
-    ?assertEqual({ok, Entry}, emq_dashboard_client:list(ClientId, 1, 100)),
+    ?assertEqual({ok, Entry}, emqx_dashboard_client:list(ClientId, 1, 100)),
     gen_tcp:close(Sock).
 
 session_query(_) ->
     Sock = client_connect_(<<16,12,0,4,77,81,84,84,4,0,0,90,0,0>>, 4),
-    {ok, Entry} = emq_dashboard_session:list(<<>>, 1, 100),
+    {ok, Entry} = emqx_dashboard_session:list(<<>>, 1, 100),
     Session= proplists:get_value(result, Entry),
     ClientId = proplists:get_value(clientId, Session), 
-    ?assertEqual({ok, Entry}, emq_dashboard_session:list(ClientId, 1, 100)),
+    ?assertEqual({ok, Entry}, emqx_dashboard_session:list(ClientId, 1, 100)),
     gen_tcp:close(Sock).
 
 route_query(_) ->
-    ok = emqttd:subscribe(<<"topic">>),
+    ok = emqx:subscribe(<<"topic">>),
     timer:sleep(10),
-    {ok, Routes} = emq_dashboard_route:list(<<>>, 1, 100),
-    ?assertEqual({ok, Routes}, emq_dashboard_route:list(<<"topic">>, 1, 100)),
-    ok = emqttd:unsubscribe(<<"topic">>).
+    {ok, Routes} = emqx_dashboard_route:list(<<>>, 1, 100),
+    ?assertEqual({ok, Routes}, emqx_dashboard_route:list(<<"topic">>, 1, 100)),
+    ok = emqx:unsubscribe(<<"topic">>).
 
 subscribe_query(_) ->
     Sock = client_connect_(<<16,12,0,4,77,81,84,84,4,0,0,90,0,0>>, 4),
-    {ok, Entry} = emq_dashboard_subscription:list(<<>>, 1, 100),
+    {ok, Entry} = emqx_dashboard_subscription:list(<<>>, 1, 100),
     Sub = proplists:get_value(result, Entry),
     ClientId = proplists:get_value(clientId, Sub), 
-    ?assertEqual({ok, Entry}, emq_dashboard_subscription:list(ClientId, 1, 100)),
+    ?assertEqual({ok, Entry}, emqx_dashboard_subscription:list(ClientId, 1, 100)),
     gen_tcp:close(Sock).
 
 admins_add_delete(_) ->
-    emq_dashboard_user:add(<<"username">>, <<"password">>, <<"tag">>),
-    emq_dashboard_user:add(<<"username1">>, <<"password1">>, <<"tag1">>),
-    {ok, Admins} = emq_dashboard_user:users(),
+    emqx_dashboard_user:add(<<"username">>, <<"password">>, <<"tag">>),
+    emqx_dashboard_user:add(<<"username1">>, <<"password1">>, <<"tag1">>),
+    {ok, Admins} = emqx_dashboard_user:users(),
     ?assertEqual(3, length(Admins)),
-    emq_dashboard_user:remover(<<"username1">>),
-    {ok, Users} = emq_dashboard_user:users(),
+    emqx_dashboard_user:remover(<<"username1">>),
+    {ok, Users} = emqx_dashboard_user:users(),
     ?assertEqual(2, length(Users)),
-    emq_dashboard_user:update(<<"username">>, <<"pwd">>, <<"login">>),
+    emqx_dashboard_user:update(<<"username">>, <<"pwd">>, <<"login">>),
     timer:sleep(10),
     ?assert(connect_dashbaord_(get, "api/brokers", auth_header_("username", "pwd"))),
-    emq_dashboard_user:remover(<<"username">>),
+    emqx_dashboard_user:remover(<<"username">>),
     ?assertEqual(false, connect_dashbaord_(get, "api/brokers", auth_header_("username", "pwd"))).
 
 client_connect_(Packet, RecvSize) ->

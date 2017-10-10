@@ -14,12 +14,11 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
-%% @doc Session API.
--module(emq_dashboard_session).
+-module(emqx_dashboard_session).
 
--include("emq_dashboard.hrl").
+-include("emqx_dashboard.hrl").
 
--include_lib("emqttd/include/emqttd.hrl").
+-include_lib("emqx/include/emqx.hrl").
 
 -include_lib("stdlib/include/qlc.hrl").
 
@@ -34,18 +33,18 @@
 list(ClientId, PageNo, PageSize) when ?EMPTY_KEY(ClientId) ->
     TotalNum = lists:sum([ets:info(Tab, size) || Tab <- tables()]),
     Qh = qlc:append([qlc:q([E || E <- ets:table(Tab)]) || Tab <- tables()]),
-    emq_dashboard:query_table(Qh, PageNo, PageSize, TotalNum, fun row/1);
+    emqx_dashboard:query_table(Qh, PageNo, PageSize, TotalNum, fun row/1);
 
 list(ClientId, PageNo, PageSize) ->
     MP = {ClientId, '_', '_', '_'},
     Fun = fun() -> lists:append([ets:match_object(Tab, MP) || Tab <- tables()]) end,
-    emq_dashboard:lookup_table(Fun, PageNo, PageSize, fun row/1).
+    emqx_dashboard:lookup_table(Fun, PageNo, PageSize, fun row/1).
 
 tables() ->
     [mqtt_local_session].
 
 row({ClientId, _Pid, _Persistent, SessInfo}) ->
-    SessStats = emqttd_stats:get_session_stats(ClientId),
+    SessStats = emqx_stats:get_session_stats(ClientId),
     [{clientId,         ClientId},
      {clean_sess,       get_value(clean_sess, SessInfo)},
      {max_inflight,     get_value(max_inflight, SessStats)},
@@ -58,5 +57,5 @@ row({ClientId, _Pid, _Persistent, SessInfo}) ->
      {created_at,       strftime(get_value(created_at, SessInfo))}].
 
 strftime(Ts) ->
-    iolist_to_binary(emq_dashboard:strftime(Ts)).
+    iolist_to_binary(emqx_dashboard:strftime(Ts)).
 

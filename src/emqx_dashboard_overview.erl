@@ -14,11 +14,11 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
--module(emq_dashboard_overview).
+-module(emqx_dashboard_overview).
 
--include("emq_dashboard.hrl").
+-include("emqx_dashboard.hrl").
 
--include_lib("emqttd/include/emqttd.hrl").
+-include_lib("emqx/include/emqx.hrl").
 
 -import(proplists, [get_value/2]).
 
@@ -52,19 +52,19 @@ brokers() ->
     {ok, lists:map(fun broker/1, Funs)}.
 
 broker(Fun) ->
-    {Fun, iolist_to_binary(emqttd_broker:Fun())}.
+    {Fun, iolist_to_binary(emqx_broker:Fun())}.
 
 stats() ->
-    {ok, emqttd_stats:getstats()}.
+    {ok, emqx_stats:getstats()}.
 
 ptype() ->
-    {ok, emqttd_vm:get_port_types()}.
+    {ok, emqx_vm:get_port_types()}.
 
 memory() ->
-    {ok, emqttd_vm:get_memory()}.
+    {ok, emqx_vm:get_memory()}.
 
 cpu() ->
-    {ok, emqttd_vm:loads()}.
+    {ok, emqx_vm:loads()}.
 
 nodes_info() ->
     Running = mnesia:system_info(running_db_nodes),
@@ -74,8 +74,8 @@ nodes_info() ->
     {ok, RunningNodes ++ DownNodes}.
 
 node_info() ->
-    CpuInfo = [{K, list_to_binary(V)} || {K, V} <- emqttd_vm:loads()],
-    Memory  = emqttd_vm:get_memory(),
+    CpuInfo = [{K, list_to_binary(V)} || {K, V} <- emqx_vm:loads()],
+    Memory  = emqx_vm:get_memory(),
     OtpRel  = "R" ++ erlang:system_info(otp_release) ++ "/" ++ erlang:system_info(version),
     [{name, node()},
      {otp_release, list_to_binary(OtpRel)},
@@ -87,7 +87,7 @@ node_info() ->
      {cluster_status, 'Running'} | CpuInfo].
 
 metrics() ->
-    {ok, emqttd_metrics:all()}.
+    {ok, emqx_metrics:all()}.
    
 listeners() ->
     {ok, lists:map(fun listener/1, esockd:listeners())}.

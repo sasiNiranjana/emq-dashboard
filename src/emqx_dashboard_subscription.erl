@@ -14,12 +14,11 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
-%% @doc Subscriptions API.
--module(emq_dashboard_subscription).
+-module(emqx_dashboard_subscription).
 
--include("emq_dashboard.hrl").
+-include("emqx_dashboard.hrl").
 
--include_lib("emqttd/include/emqttd.hrl").
+-include_lib("emqx/include/emqx.hrl").
 
 -include_lib("stdlib/include/qlc.hrl").
 
@@ -34,7 +33,7 @@
 list(Key, PageNo, PageSize) when ?EMPTY_KEY(Key) ->
     TotalNum = ets:info(?TAB, size),
     Qh = qlc:q([E || E <- ets:table(?TAB)]),
-    emq_dashboard:query_table(Qh, PageNo, PageSize, TotalNum, fun row/1);
+    emqx_dashboard:query_table(Qh, PageNo, PageSize, TotalNum, fun row/1);
 
 list(Key, PageNo, PageSize) ->
     Keys = ets:lookup(mqtt_subscription, Key),
@@ -49,7 +48,7 @@ list(Key, PageNo, PageSize) ->
                   end, Keys)
         end
     end,
-    emq_dashboard:lookup_table(Fun, PageNo, PageSize, fun row/1).
+    emqx_dashboard:lookup_table(Fun, PageNo, PageSize, fun row/1).
 
 row({{Topic, ClientId}, Option}) when is_pid(ClientId)->
     row({{Topic, list_to_binary(pid_to_list(ClientId))},Option});

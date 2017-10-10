@@ -14,11 +14,11 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
--module(emq_auth_dashboard).
+-module(emqx_auth_dashboard).
 
--include_lib("emqttd/include/emqttd.hrl").
+-include_lib("emqx/include/emqx.hrl").
 
--behaviour(emqttd_auth_mod).
+-behaviour(emqx_auth_mod).
 
 -export([init/1, check/3, description/0]).
 

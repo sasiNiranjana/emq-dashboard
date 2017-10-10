@@ -14,7 +14,7 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
--module(emq_dashboard_sup).
+-module(emqx_dashboard_sup).
 
 -behaviour(supervisor).
 
@@ -31,7 +31,7 @@ start_link() ->
 
 init([]) ->
     {ok, { {one_for_all, 10, 100},
-           [?CHILD(emq_dashboard_admin)
+           [?CHILD(emqx_dashboard_admin)
            ]
          } }.
 

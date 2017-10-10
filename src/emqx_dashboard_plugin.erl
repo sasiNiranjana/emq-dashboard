@@ -14,15 +14,11 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
-%% @doc emqttd Plugins API.
+-module(emqx_dashboard_plugin).
 
--module(emq_dashboard_plugin).
+-include_lib("emqx/include/emqx.hrl").
 
--include_lib("emqttd/include/emqttd.hrl").
-
--export([plugins/0,
-         enable/1,
-         disable/1]).
+-export([plugins/0, enable/1, disable/1]).
 
 -http_api({"plugins",  plugins,   []}).
 
@@ -31,7 +27,7 @@
 -http_api({"disable",  disable,   [{"plugin_name", atom}]}).
 
 plugins() ->
-    Plugins = lists:map(fun plugin/1, emqttd_plugins:list()),
+    Plugins = lists:map(fun plugin/1, emqx_plugins:list()),
     {ok, Plugins}.
 
 plugin(#mqtt_plugin{name = Name, version = Ver, descr = Descr,
@@ -42,7 +38,7 @@ plugin(#mqtt_plugin{name = Name, version = Ver, descr = Descr,
      {active, Active}].
 
 enable(PluginName) ->
-    case emqttd_plugins:load(PluginName) of
+    case emqx_plugins:load(PluginName) of
         {ok, _StartedApp} ->
             {ok, [{active, true}]};
         {error, _Reason} ->
@@ -50,7 +46,7 @@ enable(PluginName) ->
     end.
 
 disable(PluginName) ->
-    case emqttd_plugins:unload(PluginName) of
+    case emqx_plugins:unload(PluginName) of
         ok ->
             {ok, [{active, true}]};
         {error, _Reason} ->

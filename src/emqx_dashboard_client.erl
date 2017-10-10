@@ -15,11 +15,11 @@
 %%--------------------------------------------------------------------
 
 %% @doc Clients API.
--module(emq_dashboard_client).
+-module(emqx_dashboard_client).
 
--include("emq_dashboard.hrl").
+-include("emqx_dashboard.hrl").
 
--include_lib("emqttd/include/emqttd.hrl").
+-include_lib("emqx/include/emqx.hrl").
 
 -include_lib("stdlib/include/qlc.hrl").
 
@@ -32,11 +32,11 @@
 list(ClientId, PageNo, PageSize) when ?EMPTY_KEY(ClientId) ->
     TotalNum = ets:info(mqtt_client, size),
     Qh = qlc:q([R || R <- ets:table(mqtt_client)]),
-    emq_dashboard:query_table(Qh, PageNo, PageSize, TotalNum, fun row/1);
+    emqx_dashboard:query_table(Qh, PageNo, PageSize, TotalNum, fun row/1);
 
 list(ClientId, PageNo, PageSize) ->
     Fun = fun() -> ets:lookup(mqtt_client, ClientId) end,
-    emq_dashboard:lookup_table(Fun, PageNo, PageSize, fun row/1).
+    emqx_dashboard:lookup_table(Fun, PageNo, PageSize, fun row/1).
 
 row(#mqtt_client{client_id    = ClientId,
                  peername     = {IpAddr, Port},
@@ -45,15 +45,15 @@ row(#mqtt_client{client_id    = ClientId,
                  proto_ver    = ProtoVer,
                  keepalive    = KeepAlvie,
                  connected_at = ConnectedAt}) ->
-    Stats = emqttd_stats:get_client_stats(ClientId),
+    Stats = emqx_stats:get_client_stats(ClientId),
     [{clientId, ClientId},
      {username, Username},
-     {ipaddress, list_to_binary(emqttd_net:ntoa(IpAddr))},
+     {ipaddress, list_to_binary(emqx_net:ntoa(IpAddr))},
      {port, Port},
      {clean_sess, CleanSess},
      {proto_ver, ProtoVer},
      {keepalive, KeepAlvie},
      {send_msg, proplists:get_value(send_msg, Stats)},
      {recv_msg, proplists:get_value(recv_msg, Stats)},
-     {connected_at, list_to_binary(emq_dashboard:strftime(ConnectedAt))}].
+     {connected_at, list_to_binary(emqx_dashboard:strftime(ConnectedAt))}].
 

@@ -14,38 +14,34 @@
 %% limitations under the License.
 %%--------------------------------------------------------------------
 
-%% @doc Route API.
--module(emq_dashboard_route).
+-module(emqx_dashboard_topic).
 
--include("emq_dashboard.hrl").
+-include("emqx_dashboard.hrl").
 
--include_lib("emqttd/include/emqttd.hrl").
+-include_lib("emqx/include/emqx.hrl").
 
 -include_lib("stdlib/include/qlc.hrl").
 
--define(ROUTE, mqtt_route).
+-export([list/3]).
 
--http_api({"routes", list, [{"topic",     binary},
+-http_api({"topics", list, [{"topic",     binary},
                             {"curr_page", int, 1},
                             {"page_size", int, 100}]}).
 
--export([list/3]).
-
 list(Topic, PageNo, PageSize) when ?EMPTY_KEY(Topic) ->
-    TotalNum = lists:sum([ets:info(Tab, size) || Tab <- tables()]),
-    Qh = qlc:append([qlc:q([E || E <- ets:table(Tab)]) || Tab <- tables()]),
-    emq_dashboard:query_table(Qh, PageNo, PageSize, TotalNum, fun row/1);
+    TotalNum = mnesia:table_info(mqtt_topic, size),
+    Qh = qlc:q([R || R <- mnesia:table(mqtt_topic)]),
+    mnesia:async_dirty(fun emqx_dashboard:query_table/5, [Qh, PageNo, PageSize, TotalNum, fun row/1]);
 
 list(Topic, PageNo, PageSize) ->
-    Fun = fun() -> lists:append([ets:lookup(Tab, Topic) || Tab <- tables()]) end,
-    emq_dashboard:lookup_table(Fun, PageNo, PageSize, fun row/1).
+    Fun = fun() -> mnesia:dirty_read(mqtt_topic, Topic) end,
+    emqx_dashboard:lookup_table(Fun, PageNo, PageSize, fun row/1).
 
-tables() ->
-    [mqtt_route, mqtt_local_route].
+row(#mqtt_topic{topic = Topic, flags= _Flags}) ->
+    Count = topic_subCount(Topic),
+    [{topic, Topic}, {count, length(Count)}].
 
-row(Route) when is_record(Route, mqtt_route) ->
-    [{topic, Route#mqtt_route.topic}, {node, Route#mqtt_route.node}];
-
-row({Topic, Node}) ->
-    [{topic, Topic}, {node, Node}].
+topic_subCount(Topic) ->
+    MP = {{Topic, '_'}, '_'},
+    ets:match_object(mqtt_subproperty, MP).
 
