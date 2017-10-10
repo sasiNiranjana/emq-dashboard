@@ -15,7 +15,7 @@
 %%--------------------------------------------------------------------
 
 %% @doc Web dashboard admin authentication with username and password.
--module(emq_dashboard_admin).
+-module(emqx_dashboard_admin).
 
 -behaviour(gen_server).
 
