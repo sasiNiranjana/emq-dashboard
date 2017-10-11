@@ -89,7 +89,7 @@ handle_request(Req, State = #state{docroot = DocRoot}) ->
             respond(Req, 401, []);
         "/api/v2/" ++ _Name ->
             {_, _, [State1]} = emqttd_http:http_handler(),
-            emqttd_http:handle_request(Req, State1);
+            emqttd_http:inner_handle_request(Req, State1);
         "api/current_user" ->
             "Basic " ++ BasicAuth =  Req:get_header_value("Authorization"),
             {Username, _Password} = user_passwd(BasicAuth),
