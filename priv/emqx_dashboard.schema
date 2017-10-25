@@ -1,5 +1,11 @@
 %%-*- mode: erlang -*-
 %% emqx_dashboard config mapping
+
+{mapping, "dashboard.api.providers", "emqx_dashboard.api_providers", [
+  {datatype, string},
+  {default, "emqx_management"}
+]}.
+
 {mapping, "dashboard.listener.http", "emqx_dashboard.listeners", [
   %%{default, 18083},
   {datatype, [integer, ip]}
@@ -54,6 +60,10 @@
 {mapping, "dashboard.listener.https.fail_if_no_peer_cert", "emqx_dashboard.listeners", [
   {datatype, {enum, [true, false]}}
 ]}.
+
+{translation, "emqx_dashboard.api_providers", fun(Conf) ->
+  [ list_to_atom(S) || S <- string:tokens(cuttlefish:conf_get("dashboard.api.providers", Conf), ",") ]
+end}.
 
 {translation, "emqx_dashboard.listeners", fun(Conf) ->
   Filter = fun(Opts) -> [{K, V} || {K, V} <- Opts, V =/= undefined] end,

@@ -15,6 +15,7 @@
 %%--------------------------------------------------------------------
 
 %% @doc Web dashboard admin authentication with username and password.
+
 -module(emqx_dashboard_admin).
 
 -behaviour(gen_server).
@@ -25,8 +26,8 @@
 -export([start_link/0]).
 
 %%mqtt_admin api
--export([add_user/3, remove_user/1, update_user/3, lookup_user/1, change_password/2, 
-         all_users/0, check/2]).
+-export([add_user/3, remove_user/1, update_user/3, lookup_user/1,
+         change_password/2, all_users/0, check/2]).
 
 %% gen_server Function Exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,

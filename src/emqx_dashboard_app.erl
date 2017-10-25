@@ -25,24 +25,14 @@
 
 start(_StartType, _StartArgs) ->
     {ok, Sup} = emqx_dashboard_sup:start_link(),
-    {ok, Listeners} = application:get_env(?APP, listeners),
-    ok = emqx_access_control:register_mod(auth, emqx_auth_dashboard, [Listeners], 9999),
-    lists:foreach(fun(Listener) -> start_listener(Listener) end, Listeners),
+    ok = emqx_access_control:register_mod(
+           auth, emqx_auth_dashboard, [emqx_dashboard:listeners()], 9999),
+    emqx_dashboard:start_listeners(),
     emqx_dashboard_cli:load(),
     {ok, Sup}.
 
 stop(_State) ->
     emqx_dashboard_cli:unload(),
-    emqx_access_control:unregister_mod(auth, emqx_auth_dashboard),
-    {ok, Listeners} = application:get_env(?APP, listeners),
-    lists:foreach(fun(Listener) -> stop_listener(Listener) end, Listeners).
-
-%% start http listener
-start_listener({Proto, Port, Options}) when Proto == http orelse Proto == https ->
-    mochiweb:start_http(listener_name(Proto), Port, Options, emqx_dashboard:http_handler()).
-
-stop_listener({Proto, Port, _}) ->
-    mochiweb:stop_http(listener_name(Proto), Port).
-
-listener_name(Proto) -> list_to_atom("dashboard:" ++ atom_to_list(Proto)).
+    emqx_dashboard:stop_listeners(),
+    emqx_access_control:unregister_mod(auth, emqx_auth_dashboard).
 
