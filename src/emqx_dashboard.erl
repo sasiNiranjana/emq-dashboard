@@ -20,7 +20,7 @@
 
 -export([start_listeners/0, stop_listeners/0, listeners/0]).
 
--export([http_handlers/0, handle_request/2]).
+-export([http_handlers/0, handle_request/3]).
 
 -define(APP, ?MODULE).
 
@@ -57,8 +57,8 @@ http_handlers() ->
       [{authorization, fun is_authorized/1}]},
      {"/", {?MODULE, handle_request, [docroot()]}}].
 
-handle_request(Req, DocRoot) ->
-    handle_request(Req:get(method), Req:get(path), Req, DocRoot).
+handle_request(Path, Req, DocRoot) ->
+    handle_request(Req:get(method), Path, Req, DocRoot).
 
 handle_request('GET', "/" ++ Path, Req, DocRoot) ->
     mochiweb_request:serve_file(Path, DocRoot, Req);
