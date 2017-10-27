@@ -18,7 +18,11 @@
 
 -include("emqx_dashboard.hrl").
 
--export([list/2, create/2, update/2, delete/2]).
+-rest_api(#{name   => auth_user,
+            method => 'POST',
+            path   => "/auth",
+            func   => auth,
+            descr  => "Authenticate an user"}).
 
 -rest_api(#{name   => create_user,
             method => 'POST',
@@ -44,7 +48,32 @@
             func   => delete,
             descr  => "Delete an user"}).
 
+-rest_api(#{name   => change_pwd,
+            method => 'PUT',
+            path   => "/change_pwd/:bin:username",
+            func   => auth,
+            descr  => "Change password for an user"}).
+
+-export([list/2, create/2, update/2, delete/2, auth/2, change_pwd/2]).
+
 -define(EMPTY(V), (V == undefined orelse V == <<>>)).
+
+auth(_Bindings, Params) ->
+    Username = proplists:get_value(<<"username">>, Params),
+    Password = proplists:get_value(<<"password">>, Params),
+    case emqx_dashboard_admin:check(Username, Password) of
+        ok -> ok;
+        {error, Reason} ->
+            {error, #{message => Reason}}
+    end.
+
+change_pwd(#{username := Username}, Params) ->
+    OldPwd = proplists:get_value(<<"old_pwd">>, Params),
+    NewPwd = proplists:get_value(<<"new_pwd">>, Params),
+    case emqx_dashboard_admin:change_password(Username, OldPwd, NewPwd) of
+        ok -> ok;
+        {error, Reason} -> {error, #{message => Reason}}
+    end.
 
 create(_Bindings, Params) ->
     Username = proplists:get_value(<<"username">>, Params),

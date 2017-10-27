@@ -110,18 +110,18 @@ return({aborted, Reason}) ->
     {error, Reason}.
 
 check(undefined, _) ->
-    {error, "Username undefined"};
+    {error, <<"Username undefined">>};
 check(_, undefined) ->
-    {error, "Password undefined"};
+    {error, <<"Password undefined">>};
 check(Username, Password) ->
     case lookup_user(Username) of
         [#mqtt_admin{password = <<Salt:4/binary, Hash/binary>>}] ->
             case Hash =:= md5_hash(Salt, Password) of
                 true  -> ok;
-                false -> {error, "Password Error"}
+                false -> {error, <<"Password Error">>}
             end;
         [] ->
-            {error, "Username Not Found"}
+            {error, <<"Username Not Found">>}
     end.
 
 %%--------------------------------------------------------------------

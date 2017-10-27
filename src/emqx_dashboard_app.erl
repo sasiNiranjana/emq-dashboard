@@ -18,10 +18,7 @@
 
 -behaviour(application).
 
-%% Application callbacks
 -export([start/2, stop/1]).
-
--define(APP, emqx_dashboard).
 
 start(_StartType, _StartArgs) ->
     {ok, Sup} = emqx_dashboard_sup:start_link(),
