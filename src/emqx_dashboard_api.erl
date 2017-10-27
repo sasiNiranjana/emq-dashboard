@@ -61,19 +61,12 @@
 auth(_Bindings, Params) ->
     Username = proplists:get_value(<<"username">>, Params),
     Password = proplists:get_value(<<"password">>, Params),
-    case emqx_dashboard_admin:check(Username, Password) of
-        ok -> ok;
-        {error, Reason} ->
-            {error, #{message => Reason}}
-    end.
+    return(emqx_dashboard_admin:check(Username, Password)).
 
 change_pwd(#{username := Username}, Params) ->
     OldPwd = proplists:get_value(<<"old_pwd">>, Params),
     NewPwd = proplists:get_value(<<"new_pwd">>, Params),
-    case emqx_dashboard_admin:change_password(Username, OldPwd, NewPwd) of
-        ok -> ok;
-        {error, Reason} -> {error, #{message => Reason}}
-    end.
+    return(emqx_dashboard_admin:change_password(Username, OldPwd, NewPwd)).
 
 create(_Bindings, Params) ->
     Username = proplists:get_value(<<"username">>, Params),
