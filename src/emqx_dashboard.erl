@@ -33,13 +33,13 @@ start_listeners() ->
 
 %% Start HTTP Listener
 start_listener({Proto, Port, Options}) when Proto == http; Proto == https ->
-    emqx_rest:start_http(listener_name(Proto), Port, Options, http_handlers()).
+    minirest:start_http(listener_name(Proto), Port, Options, http_handlers()).
 
 stop_listeners() ->
     lists:foreach(fun(Listener) -> stop_listener(Listener) end, listeners()).
 
 stop_listener({Proto, Port, _}) ->
-    emqx_rest:stop_http(listener_name(Proto), Port).
+    minirest:stop_http(listener_name(Proto), Port).
 
 listeners() ->
     application:get_env(?APP, listeners, []).
@@ -53,7 +53,7 @@ listener_name(Proto) ->
 
 http_handlers() ->
     ApiProviders = application:get_env(?APP, api_providers, []),
-    [{"/api/v2/", emqx_rest_handler:init(#{apps => ApiProviders}),
+    [{"/api/v2/", minirest:handler(#{apps => ApiProviders}),
       [{authorization, fun is_authorized/1}]},
      {"/", {?MODULE, handle_request, [docroot()]}}].
 
