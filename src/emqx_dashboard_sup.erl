@@ -18,10 +18,8 @@
 
 -behaviour(supervisor).
 
-%% API
 -export([start_link/0]).
 
-%% Supervisor callbacks
 -export([init/1]).
 
 -define(CHILD(I), {I, {I, start_link, []}, permanent, 5000, worker, [I]}).
