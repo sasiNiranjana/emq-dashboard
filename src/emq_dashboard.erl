@@ -170,8 +170,8 @@ authorized(Req) ->
             case emq_dashboard_admin:check(bin(Username), bin(Password)) of
                 ok -> true;
                 {error, Reason} ->
-                    lager:error("HTTP Auth failure: username=~s, reason=~p",
-                                [Username, Reason]),
+                    lager:error("HTTP Auth failure: ipaddress=~s, username=~s, reason=~p",
+                                [Req:get(peer), Username, Reason]),
                     false
             end;
          _   ->
