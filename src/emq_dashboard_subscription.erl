@@ -38,22 +38,22 @@ list(Key, PageNo, PageSize) when ?EMPTY_KEY(Key) ->
 
 list(Key, PageNo, PageSize) ->
     Keys = ets:lookup(mqtt_subscription, Key),
-    Fun = 
+    Fun =
     case length(Keys) == 0 of
     true ->
-        MP = {{Key, '_'}, '_'},
-        fun() -> ets:match_object(mqtt_subproperty, MP) end;
+        fun() -> ets:match_object(mqtt_subproperty, {{Key, '_'}, '_'}) end;
     false ->
-        fun() ->
-        lists:map(fun({S, T}) ->[R] = ets:lookup(?TAB, {T, S}), R 
-                  end, Keys)
-        end
+        fun() -> lists:map(fun({S, T}) ->[R] = ets:lookup(?TAB, {T, S}), R end, Keys) end
     end,
     emq_dashboard:lookup_table(Fun, PageNo, PageSize, fun row/1).
 
-row({{Topic, ClientId}, Option}) when is_pid(ClientId)->
-    row({{Topic, list_to_binary(pid_to_list(ClientId))},Option});
-row({{Topic, ClientId}, Option}) ->
-    Qos = proplists:get_value(qos, Option),
-    [{clientid, ClientId}, {topic, Topic}, {qos, Qos}].
+row({{Topic, SubPid}, Options}) when is_pid(SubPid) ->
+    row({{Topic, {undefined, SubPid}}, Options});
+row({{Topic, {SubId, SubPid}}, Options}) ->
+    Qos = proplists:get_value(qos, Options),
+    ClientId = case SubId of
+                   undefined -> list_to_binary(pid_to_list(SubPid));
+                   SubId     -> SubId
+               end,
+    [{client_id, ClientId}, {topic, Topic}, {qos, Qos}].
 
