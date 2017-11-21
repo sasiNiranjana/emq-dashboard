@@ -1,6 +1,6 @@
 PROJECT = emqx_dashboard
 PROJECT_DESCRIPTION = EMQ X Web Dashboard
-PROJECT_VERSION = 2.4
+PROJECT_VERSION = 2.3.0
 
 LOCAL_DEPS = mnesia
 
@@ -8,7 +8,7 @@ DEPS = minirest
 dep_minirest = git https://github.com/emqx/minirest
 
 BUILD_DEPS = emqx cuttlefish
-dep_emqx = git https://github.com/emqtt/emqttd X
+dep_emqx = git https://github.com/emqx/emqx X
 dep_cuttlefish = git https://github.com/emqtt/cuttlefish
 
 NO_AUTOPATCH = cuttlefish
