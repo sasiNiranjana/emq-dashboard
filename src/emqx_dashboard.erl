@@ -76,6 +76,11 @@ docroot() ->
 %%--------------------------------------------------------------------
 
 is_authorized(Req) ->
+    is_authorized(Req:get(path), Req).
+
+is_authorized("/api/v2/auth" ++ _, _Req) ->
+    true;
+is_authorized(_Path, Req) ->
     case Req:get_header_value("Authorization") of
         "Basic " ++ BasicAuth ->
             {Username, Password} = user_passwd(BasicAuth),
