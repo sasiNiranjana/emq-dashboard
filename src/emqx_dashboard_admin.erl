@@ -174,7 +174,7 @@ md5_hash(SaltBin, Password) ->
 
 salt() ->
     emqx_time:seed(),
-    Salt = random:uniform(16#ffffffff),
+    Salt = rand:uniform(16#ffffffff),
     <<Salt:32>>.
 
 needs_defaut_user() ->
