@@ -26,8 +26,8 @@
 -export([start_link/0]).
 
 %%mqtt_admin api
--export([add_user/3, remove_user/1, update_user/3, lookup_user/1,
-         change_password/2, all_users/0, check/2]).
+-export([add_user/3, remove_user/1, update_user/2, lookup_user/1,
+         change_password/2, change_password/3, all_users/0, check/2]).
 
 %% gen_server Function Exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -65,16 +65,21 @@ remove_user(Username) when is_binary(Username) ->
             end,
     return(mnesia:transaction(Trans)).
 
--spec(update_user(binary(), binary(), binary()) -> ok | {error, any()}).
-update_user(Username, Password, Tags) when is_binary(Username), is_binary(Password) ->
-    Admin = #mqtt_admin{username = Username, password = hash(Password), tags = Tags},
-    return(mnesia:transaction(fun update_user_/1, [Admin])).
+-spec(update_user(binary(), binary()) -> ok | {error, term()}).
+update_user(Username, Tags) when is_binary(Username) ->
+    return(mnesia:transaction(fun update_user_/2, [Username, Tags])).
 
 %% @private
-update_user_(Admin = #mqtt_admin{username = Username}) ->
+update_user_(Username, Tags) ->
     case mnesia:wread({mqtt_admin, Username}) of
-        []  -> mnesia:abort("username not found");
-        [_] -> mnesia:write(Admin)
+        [] -> mnesia:abort(username_not_found);
+        [Admin] -> mnesia:write(Admin#mqtt_admin{tags = Tags})
+    end.
+
+change_password(Username, OldPasswd, NewPasswd) when is_binary(Username) ->
+    case check(Username, OldPasswd) of
+        ok -> change_password(Username, NewPasswd);
+        Error -> Error
     end.
 
 change_password(Username, Password) when is_binary(Username), is_binary(Password) ->
