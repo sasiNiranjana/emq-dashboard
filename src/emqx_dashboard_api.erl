@@ -66,7 +66,6 @@ auth(_Bindings, Params) ->
 change_pwd(#{username := Username}, Params) ->
     OldPwd = proplists:get_value(<<"old_pwd">>, Params),
     NewPwd = proplists:get_value(<<"new_pwd">>, Params),
-    io:format("Username: ~s, old_pwd: ~s, new_pwd: ~s~n", [Username, OldPwd, NewPwd]),
     return(emqx_dashboard_admin:change_password(Username, OldPwd, NewPwd)).
 
 create(_Bindings, Params) ->
